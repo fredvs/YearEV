@@ -5,7 +5,7 @@ uses
  msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,msedragglob,
  msegrids,msegridsglob,msekeyboard,sysutils,msestrings, msesimplewidgets,
- msebitmap;
+ msebitmap, msetraywidget;
 type
  tyearlistfo = class(tmseform)
    tstringgrid1: tstringgrid;
@@ -13,6 +13,9 @@ type
    tframecomp2: tframecomp;
    timagelist5: timagelist;
    tbutton1: tbutton;
+   ttraywidget1: ttraywidget;
+   tbutton2: tbutton;
+   tpopupmenu1: tpopupmenu;
    procedure keyup(const sender: twidget; var ainfo: keyeventinfoty);
    procedure onclose(const sender: TObject);
    procedure olc(const sender: tcustomgrid);
@@ -23,6 +26,11 @@ function Import : boolean;
 function Load : boolean;
 function Save : boolean;
    procedure onnow(const sender: TObject);
+   procedure onmouse(const sender: twidget; var ainfo: mouseeventinfoty);
+   procedure onhide(const sender: TObject);
+   procedure onquit(const sender: TObject);
+   procedure onfocus(const sender: TObject);
+   procedure onloop(const sender: TObject);
  end;
 function vg(y : Int64) : boolean;
 const
@@ -33,6 +41,8 @@ yearlistfo: tyearlistfo;
 efyearlistfo : boolean = false;
 onetime : boolean;
 yearlistfile : string;
+initYear, initMonth, initDay : Word;
+isinit : boolean = false;
  
 implementation
 uses
@@ -66,7 +76,6 @@ end;
 procedure tyearlistfo.onl(const sender: TObject);
   var
     f, ff, c: LongInt;
-	d1 : byte;
 	aDate : TDateTime;
 	aYear, aMonth, aDay : Word; 
 	OldShortDateFormat: string;
@@ -118,6 +127,7 @@ begin
 yearlistfile := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0))) + 'yearlist.txt';
 onetime := false;
 if fileexists(yearlistfile) then Load else Import;
+ DecodeDate(now, initYear, initMonth, initDay);
 end;
 
 procedure tyearlistfo.oact(const sender: TObject);
@@ -187,7 +197,6 @@ end;
 function tyearlistfo.Save : boolean;
 var
     f  : LongInt;
-    s  : msestring;
     yearlistfp : Text;
 begin
 AssignFile(yearlistfp, yearlistfile);
@@ -205,4 +214,54 @@ onetime := false;
 oact(sender);
 end;
 
+procedure tyearlistfo.onmouse(const sender: twidget;
+               var ainfo: mouseeventinfoty);
+begin
+if (ainfo.eventkind = ek_buttonrelease) and (ainfo.button = mb_left) then
+ begin
+   if visible then visible := false else 
+   begin
+     visible := true;
+     bringtofront;
+   end;
+   end;
+end;
+
+procedure tyearlistfo.onhide(const sender: TObject);
+begin
+visible := false;
+end;
+
+procedure tyearlistfo.onquit(const sender: TObject);
+begin
+save;
+close;
+end;
+
+procedure tyearlistfo.onfocus(const sender: TObject);
+var
+aYear, aMonth, aDay : Word; 
+begin
+if isinit = true then
+begin
+//writeln('focused');
+DecodeDate(now, aYear, aMonth, aDay);
+if (initYear = aYear) and (initMonth = aMonth) and (initDay = aDay) then
+else 
+begin
+//writeln('not even');
+ caption :=  inttostr(aYear);
+ tbutton1.caption := longdayNames[DayOfWeek(now)] + ' ' + 
+                                         inttostr(aDay) + ' '+ longMonthNames[aMonth] +
+                                       ' (' + IntToStr(aMonth) + ')';
+
+ DecodeDate(now, initYear, initMonth, initDay);
+end;
+end;
+end;
+
+procedure tyearlistfo.onloop(const sender: TObject);
+begin
+isinit := true;
+end;
 end.
