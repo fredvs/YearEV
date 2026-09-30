@@ -28,10 +28,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
       with:
-        submodules: true
+        submodules: recursive # Changed from 'true' to 'recursive' to ensure all nested folders pull properly
 
     - name: Update submodules to latest remote HEAD
-      run: git submodule update --remote --recursive
+      run: git submodule update --init --recursive --remote # Added --init to ensure empty directories are populated before updating
 
     - name: Build on Linux
       if: runner.os == 'Linux'
