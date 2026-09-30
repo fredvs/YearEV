@@ -34,12 +34,12 @@ jobs:
     - name: Update submodules to latest remote HEAD
       run: git submodule update --init --recursive --remote
 
-    # Uses the Windows built-in package manager to install a clean, verified standalone FPC binary
+    # Installs pure Free Pascal using Chocolatey and exposes its location to Bash
     - name: Install Pure FPC on Windows
       if: runner.os == 'Windows'
       run: |
-        choco install fpc --no-progress
-        echo "C:\tools\fpc\bin\i386-win32" >> $GITHUB_PATH
+        choco install freepascal --no-progress
+        echo "C:\tools\freepascal\bin\i386-win32" >> $GITHUB_PATH
 
     - name: Build on Linux
       if: runner.os == 'Linux'
