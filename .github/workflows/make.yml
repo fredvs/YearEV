@@ -34,21 +34,18 @@ jobs:
     - name: Update submodules to latest remote HEAD
       run: git submodule update --init --recursive --remote
 
-    - name: Install Lazarus/FPC on Windows
-      if: runner.os == 'Windows'
-      uses: gcarreno/setup-lazarus@v3
-      with:
-        lazarus-version: stable
-
-    - name: Add FPC binary path to Bash environment on Windows
+    # 1. LIGHTWEIGHT WINDOWS FPC INSTALLATION (NO LAZARUS)
+    - name: Install Pure FPC on Windows
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        # Locate where setup-lazarus installed fpc.exe and append it to the runner path
-        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
-        if [ -n "$FPC_DIR" ]; then
-          echo "$FPC_DIR" >> $GITHUB_PATH
-        fi
+        echo "Downloading and extracting official standalone FPC..."
+        curl -sL "https://github.com" -o fpc.zip
+        mkdir -p /c/fpc
+        unzip -q fpc.zip -d /c/fpc
+        
+        # Inject the FPC binary path globally into the runner environment path
+        echo "/c/fpc/bin" >> $GITHUB_PATH
 
     - name: Build on Linux
       if: runner.os == 'Linux'

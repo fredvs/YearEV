@@ -8,7 +8,7 @@ fi
 
 if [[ "${ID:-}" == "debian" || "${ID:-}" == "ubuntu" ]]; then
     sudo bash -c '
-        apt-get update; apt-get -y install lazarus
+        apt-get update; apt-get -y install fpc
     ' >/dev/null
 fi
 
