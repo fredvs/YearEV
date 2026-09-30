@@ -23,17 +23,23 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - windows-latest # 1. Added Windows to the build target grid
 
     steps:
     - name: Checkout
       uses: actions/checkout@v7
       with:
-        submodules: recursive # Changed from 'true' to 'recursive' to ensure all nested folders pull properly
+        submodules: recursive 
 
     - name: Update submodules to latest remote HEAD
-      run: git submodule update --init --recursive --remote # Added --init to ensure empty directories are populated before updating
+      run: git submodule update --init --recursive --remote 
 
     - name: Build on Linux
       if: runner.os == 'Linux'
+      shell: bash
+      run: bash .github/workflows/make.sh
+
+    - name: Build on Windows
+      if: runner.os == 'Windows' # 2. Only runs when the matrix falls on windows-latest
       shell: bash
       run: bash .github/workflows/make.sh
