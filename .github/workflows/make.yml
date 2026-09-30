@@ -34,20 +34,22 @@ jobs:
     - name: Update submodules to latest remote HEAD
       run: git submodule update --init --recursive --remote
 
-    # Downloads and deploys the official stable SourceForge installer out-of-the-box
-    - name: Install Official Standalone FPC on Windows
+    # Windows handles path mapping and fpc.cfg creation out-of-the-box via this action
+    - name: Install Lazarus/FPC on Windows
       if: runner.os == 'Windows'
-      shell: powershell
+      uses: gcarreno/setup-lazarus@v3
+      with:
+        lazarus-version: stable
+
+    # Maps the Lazarus action's FPC path directly into the custom Bash environment layer
+    - name: Add FPC binary path to Bash environment on Windows
+      if: runner.os == 'Windows'
+      shell: bash
       run: |
-        echo "Downloading official Free Pascal compiler from SourceForge..."
-        $url = "https://sourceforge.net"
-        Invoke-WebRequest -Uri $url -OutFile "fpc_installer.exe"
-        
-        echo "Running background silent installation..."
-        Start-Process -FilePath ".\fpc_installer.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/DIR=C:\fpc" -Wait
-        
-        echo "Injecting clean binary environment paths..."
-        echo "C:\fpc\3.2.2\bin\i386-win32" >> $GITHUB_PATH
+        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
+        if [ -n "$FPC_DIR" ]; then
+          echo "$FPC_DIR" >> $GITHUB_PATH
+        fi
 
     - name: Build on Linux
       if: runner.os == 'Linux'
