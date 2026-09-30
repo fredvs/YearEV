@@ -34,24 +34,20 @@ jobs:
     - name: Update submodules to latest remote HEAD
       run: git submodule update --init --recursive --remote
 
-    # Installs Free Pascal via Chocolatey and locates the generated compiler location
-    - name: Install Pure FPC on Windows
+    # Downloads and deploys the official stable SourceForge installer out-of-the-box
+    - name: Install Official Standalone FPC on Windows
       if: runner.os == 'Windows'
-      shell: bash
+      shell: powershell
       run: |
-        choco install freepascal --no-progress
+        echo "Downloading official Free Pascal compiler from SourceForge..."
+        $url = "https://sourceforge.net"
+        Invoke-WebRequest -Uri $url -OutFile "fpc_installer.exe"
         
-        # Dynamically search where choco created the bin directory containing fpc.exe
-        FPC_BIN_DIR=$(find /c/tools/freepascal -type f -name "fpc.exe" -exec dirname {} \; | head -n 1)
+        echo "Running background silent installation..."
+        Start-Process -FilePath ".\fpc_installer.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/DIR=C:\fpc" -Wait
         
-        if [ -n "$FPC_BIN_DIR" ]; then
-          echo "Found FPC binary directory at: $FPC_BIN_DIR"
-          # Convert the MSYS/GitBash path format back to a Windows standard string for the global path mapper
-          WINDOWS_PATH=$(cygpath -w "$FPC_BIN_DIR")
-          echo "$WINDOWS_PATH" >> $GITHUB_PATH
-        else
-          echo "ERROR: fpc.exe was not found inside C:\tools\freepascal" && exit 1
-        fi
+        echo "Injecting clean binary environment paths..."
+        echo "C:\fpc\3.2.2\bin\i386-win32" >> $GITHUB_PATH
 
     - name: Build on Linux
       if: runner.os == 'Linux'
