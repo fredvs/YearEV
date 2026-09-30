@@ -34,12 +34,12 @@ jobs:
     - name: Update submodules to latest remote HEAD
       run: git submodule update --init --recursive --remote
 
-    # Installs pure FPC on Windows without dragging in the Lazarus IDE package
+    # Uses the Windows built-in package manager to install a clean, verified standalone FPC binary
     - name: Install Pure FPC on Windows
       if: runner.os == 'Windows'
-      uses: kmaron/setup-fpc@v1
-      with:
-        fpc-version: '3.2.2'
+      run: |
+        choco install fpc --no-progress
+        echo "C:\tools\fpc\bin\i386-win32" >> $GITHUB_PATH
 
     - name: Build on Linux
       if: runner.os == 'Linux'
