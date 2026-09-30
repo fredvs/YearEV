@@ -15,7 +15,7 @@ declare -ar OPS=(
 )
 declare -i exitCode=0
 mapfile -t < <(
-    if (fpc "${OPS[@]}" "src/yearev.pas.pas"); then
+    if (fpc "${OPS[@]}" "src/yearev.pas"); then
         printf '\x1b[32mSUCCES\x1b[0m\n' >&2
         printf 'exitCode:0\n'
     else
